@@ -19,11 +19,7 @@ from sklearn.metrics import mean_squared_error
 def computeError(R, predR):
     
     """Calculate the MSE for predictions"""
-    
-    mse = mean_squared_error(R,predR)
-    
     error = ((R - predR)**2).mean()
-    assert(round(mse,5) == round(error,5))
     
     return error
 
@@ -138,6 +134,6 @@ R = np.array([
 
 k = 3
 alpha = 0.01
-iterations = 20
+iterations = 100
 
 matrixFactorization(R,k,iterations, alpha)
