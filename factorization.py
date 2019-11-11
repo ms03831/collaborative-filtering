@@ -19,7 +19,8 @@ from sklearn.metrics import mean_squared_error
 def computeError(R, predR):
     
     """Calculate the MSE for predictions"""
-    error = ((R - predR)**2).mean()
+    nonZeroIndex = np.where(R != 0)
+    error = ((R[nonZeroIndex] - predR[nonZeroIndex])**2).mean()
     
     return error
 
@@ -60,13 +61,14 @@ def runGradientDescent(R,P,Q,U,I,iterations,alpha):
         R_ = getPredictedRatings(P,Q,U,I)
         for user in range(P.shape[0]):
             for item in range(Q.shape[1]): 
-                if R[user][item]:
+                if R[user][item]: #only compute gradients and updates for non zero ratings.
                     error = R[user][item] - R_[user][item]
                     #updating features and biases
                     P[user, :] += 2*alpha*error*Q[:, item]
                     Q[:, item] += 2*alpha*error*P[user, :]
-                    U[user] -= alpha*error
-                    I[item] -= alpha*error
+                    U[user] += 2*alpha*error
+                    I[item] += 2*alpha*error
+        # to compute mean squared error.
         R_ = getPredictedRatings(P,Q,U,I)
         err = computeError(R, R_)
         stats.append((itr, err))
@@ -82,7 +84,7 @@ in a rating matrix (R) using gradient descent. K is number of latent
 variables and alpha is the learning rate to be used in gradient decent
 """    
 
-def matrixFactorization(R,k,iterations, alpha):
+def matrixFactorization(R, k, iterations, alpha):
 
     """Your code to initialize P, Q, U and I matrices goes here. P and Q will
     be randomly initialized whereas U and I will be initialized as zeros. 
@@ -106,6 +108,8 @@ def matrixFactorization(R,k,iterations, alpha):
     print(I)
     print("P x Q:")
     print(getPredictedRatings(P,Q,U,I))
+    print("Original R")
+    print(R)
     plotGraph(stats)
        
     
@@ -133,7 +137,6 @@ R = np.array([
 ])
 
 k = 3
-alpha = 0.01
-iterations = 100
-
+alpha = 0.0025
+iterations = 500
 matrixFactorization(R,k,iterations, alpha)
